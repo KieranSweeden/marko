@@ -1,15 +1,15 @@
 use crate::cli::Cli;
-use std::{fs::File, path::Path};
+use std::path::Path;
 
 #[derive(Debug)]
-pub struct Config {
-    pub file: File,
+pub struct Config<'a> {
+    pub path: &'a Path,
 }
 
-impl TryFrom<Cli> for Config {
+impl<'a> TryFrom<&'a Cli> for Config<'a> {
     type Error = String;
 
-    fn try_from(cli: Cli) -> Result<Self, Self::Error> {
+    fn try_from(cli: &'a Cli) -> Result<Self, Self::Error> {
         let path = Path::new(&cli.path);
 
         if !path.exists() {
@@ -31,9 +31,7 @@ impl TryFrom<Cli> for Config {
             ));
         }
 
-        let file = File::open(path).expect("Failed to open file");
-
-        Ok(Self { file })
+        Ok(Self { path })
     }
 }
 
@@ -47,7 +45,7 @@ mod tests {
         let cli = Cli {
             path: file_path_pointing_to_unsupported_file,
         };
-        let result = Config::try_from(cli);
+        let result = Config::try_from(&cli);
         assert!(result.is_err());
     }
 
@@ -57,7 +55,7 @@ mod tests {
         let cli = Cli {
             path: file_path_pointing_to_nothing,
         };
-        let result = Config::try_from(cli);
+        let result = Config::try_from(&cli);
         assert!(result.is_err());
     }
 
@@ -67,7 +65,7 @@ mod tests {
         let cli = Cli {
             path: file_path_pointing_to_directory,
         };
-        let result = Config::try_from(cli);
+        let result = Config::try_from(&cli);
         assert!(result.is_err());
     }
 
@@ -77,7 +75,7 @@ mod tests {
         let cli = Cli {
             path: file_path_pointing_to_supported_file,
         };
-        let result = Config::try_from(cli);
+        let result = Config::try_from(&cli);
         assert!(result.is_ok());
     }
 }

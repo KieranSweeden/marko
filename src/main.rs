@@ -8,7 +8,7 @@ use clap::Parser;
 fn main() {
     let cli = Cli::parse();
 
-    match Config::try_from(cli) {
+    match Config::try_from(&cli) {
         Ok(config) => run(config),
         Err(error) => {
             panic!("{error}");
